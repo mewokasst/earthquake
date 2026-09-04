@@ -30,6 +30,12 @@ select#waveform { height: auto; min-height: 0; background: #1d2c31; }
 @media (min-width: 761px) { .topbar { height: 68px; padding: 12px 22px; } h1 { font-size: 30px; } .layout, .viewport-panel, #scene { min-height: calc(100svh - 68px); } .wave-dock { bottom: 14px; height: 126px; } .metrics-dock { right: 14px; bottom: 14px; width: 250px; } .damage-report { top: 48%; min-height: 180px; } }
 .camera-dock { z-index: 4; }
 .viewport-panel.ui-hidden .damage-report, .viewport-panel.ui-hidden .wave-dock, .viewport-panel.ui-hidden .metrics-dock { display: none; }
+.report-title { position: relative; padding-right: 26px; }
+.report-toggle { position: absolute; top: -5px; right: 0; width: 22px; height: 22px; padding: 0; color: var(--amber); border: 1px solid var(--line); background: #1d2c31; font: 500 16px/18px 'DM Mono', monospace; }
+.report-toggle:hover, .report-toggle:focus-visible { color: #ffffff; border-color: var(--amber); }
+.damage-report.compact { min-height: 0; height: auto; resize: none; }
+.damage-report.compact .report-content, .damage-report.compact .danger-legend { display: none; }
+.damage-report.compact .report-summary { margin-top: 4px; }
 .time-dock { position: absolute; z-index: 3; top: 18px; right: 205px; display: flex; align-items: center; gap: 9px; width: auto; min-height: 40px; margin: 0; padding: 8px 11px; color: var(--ink); background: rgba(12, 17, 22, .88); border: 1px solid var(--line); cursor: pointer; transition: border-color .18s ease, background .18s ease; }
 .time-dock:hover, .time-dock:focus-within { border-color: var(--amber); background: rgba(20, 31, 36, .96); }
 .time-dock span:not(.time-icon):not(.time-switch) { color: var(--muted); font-size: 9px; font-weight: 500; text-transform: uppercase; transition: color .18s ease; }
