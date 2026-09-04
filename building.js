@@ -838,10 +838,21 @@ class BuildingView {
       state.slabY = floor.slab.position.y;
       state.pieces = [];
       state.facadePieces = [];
+      state.facadeY = floor.facades.map(facade => facade.position.y);
+      state.crackY = floor.crackGroup.position.y;
+      state.columns = [];
+      this.columnSegs.forEach(segs => {
+        const column = segs[i];
+        state.columns.push({ mesh: column.mesh, y: column.mesh.position.y, rotation: column.mesh.rotation.z });
+      });
+      this.midColumns.forEach(columnGroup => {
+        const column = columnGroup.segs[i];
+        state.columns.push({ mesh: column.mesh, y: column.mesh.position.y, rotation: column.mesh.rotation.z });
+      });
       const slabWidth = floor.slab.geometry.parameters.width || this.width;
       const slabHeight = floor.slab.geometry.parameters.height || 0.24;
       floor.slab.visible = true;
-      const gridSize = Math.max(8, Math.ceil(Math.sqrt(Math.max(1, this.stories)) * 2));
+      const gridSize = 2;
       const pieceWidth = slabWidth / gridSize;
         for (let row = 0; row < gridSize; row++) {
           for (let column = 0; column < gridSize; column++) {
@@ -856,8 +867,8 @@ class BuildingView {
             this.group.add(piece);
             state.pieces.push({
               mesh: piece,
-              x: floor.slab.position.x + (column - 3.5) * pieceWidth + (Math.random() - 0.5) * pieceWidth * 0.12,
-              z: (row - 3.5) * pieceWidth + (Math.random() - 0.5) * pieceWidth * 0.12,
+              x: floor.slab.position.x + (column - 0.5) * pieceWidth + (Math.random() - 0.5) * pieceWidth * 0.12,
+              z: (row - 0.5) * pieceWidth + (Math.random() - 0.5) * pieceWidth * 0.12,
               y: state.slabY,
               rotation: (Math.random() - 0.5) * 0.18,
               spin: (Math.random() - 0.5) * 1.3
@@ -885,9 +896,9 @@ class BuildingView {
               state.facadePieces.push({
                 mesh: tile,
                 source: facade,
-                x: facade.position.x + (horizontal ? (column - 3.5) * tileWidth : 0),
+                x: facade.position.x + (horizontal ? (column - 0.5) * tileWidth : 0),
                 y: facade.position.y - facadeHeight / 2 + (row + 0.5) * tileHeight,
-                z: facade.position.z + (horizontal ? 0 : (column - 3.5) * tileWidth),
+                z: facade.position.z + (horizontal ? 0 : (column - 0.5) * tileWidth),
                 rotation: (Math.random() - 0.5) * 0.14,
                 spin: (Math.random() - 0.5) * 1.1
               });

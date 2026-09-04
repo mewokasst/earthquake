@@ -203,8 +203,25 @@ class ShearBuilding {
     const pDelta =
       this.getPDeltaRatio(i);
 
+    const thresholds =
+      this.driftThresholds();
+
+    const drift =
+      this.peakDrift[i];
+
+    let damageFactor = 1;
+
+    if (drift >= thresholds.collapse) {
+      damageFactor = 0.12;
+    } else if (drift >= thresholds.severe) {
+      damageFactor = 0.45;
+    } else if (drift >= thresholds.warning) {
+      damageFactor = 0.78;
+    }
+
     return this.kStory *
-      (1 - pDelta);
+      (1 - pDelta) *
+      damageFactor;
   }
 
   getStoryDrift(i) {
