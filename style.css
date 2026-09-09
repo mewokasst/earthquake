@@ -298,14 +298,33 @@ button:hover { color: var(--accent-dark); border-color: var(--accent); }
 @media (max-width: 520px) {
 	.topbar { padding: 13px 14px; }
 	h1 { font-size: 28px; }
-	.damage-report { width: min(250px, calc(100vw - 28px)); min-height: 0; }
-	.damage-report .report-content { display: none; }
+	.damage-report { top: 58px; width: min(292px, calc(100vw - 28px)); max-height: calc(100svh - 94px); min-height: 0; padding: 10px 11px; overflow-y: auto; }
+	.damage-report .report-title { margin-bottom: 6px; font-size: 8px; }
+	.damage-report .report-content { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 7px; }
+	.damage-report table { font-size: 8px; }
+	.damage-report th, .damage-report td { height: 15px; padding: 2px; }
 	.damage-report .report-summary { grid-template-columns: 1fr; }
-	.wave-dock { width: 164px; height: 112px; }
-	.metrics-dock { width: 164px; }
-	.metrics-dock div { min-height: 50px; }
-	.metrics-dock strong { font-size: 16px; }
-	.time-dock { right: 116px; padding: 7px; gap: 5px; }
+	.damage-report .report-summary span { font-size: 8px; white-space: normal; }
+	.damage-report .verdict { margin-top: 5px; padding: 6px; font-size: 11px; }
+	.danger-legend { margin-top: 7px; font-size: 7px; }
+	.wave-dock { width: 150px; height: 104px; padding: 9px 10px; }
+	.wave-dock .report-title { margin-bottom: 4px; font-size: 7px; }
+	.wave-dock .wave-readout { top: 9px; right: 10px; font-size: 7px; }
+	.metrics-dock { width: 150px; }
+	.metrics-dock div { min-height: 44px; padding: 6px; }
+	.metrics-dock span { font-size: 6px; }
+	.metrics-dock strong { margin-top: 3px; font-size: 14px; }
+	.time-dock { right: 145px; padding: 6px; gap: 4px; }
 	.time-dock span:not(.time-icon):not(.time-switch) { font-size: 7px; }
-	.time-switch { width: 32px; }
+	.time-icon { font-size: 14px; }
+	.time-switch { width: 30px; height: 20px; }
+	.camera-dock { gap: 4px; }
+	.camera-dock .cam-btn { width: 36px; height: 34px; font-size: 19px; }
+	.controls { top: 78px; right: 10px; width: min(290px, calc(100vw - 20px)); padding: 16px; }
+	.section-heading { margin-bottom: 16px; }
+	label { margin: 12px 0; font-size: 9px; }
+	input[type=range] { margin-top: 7px; }
+	select { margin-top: 6px; padding: 7px; }
+	.actions { gap: 6px; margin-top: 16px; }
+	.actions button { min-height: 36px; padding: 8px 10px; font-size: 10px; }
 }
