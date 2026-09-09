@@ -116,6 +116,24 @@ class BuildingView {
       columnMaterial;
 
     /*
+     * Shared unit-cube geometry + glazing material for facade
+     * windows. Every window is one scaled instance of this same
+     * geometry, added as a child of its floor's facade panel so it
+     * automatically follows that panel's sway/collapse motion.
+     */
+    this.windowGeometry =
+      new THREE.BoxGeometry(1, 1, 1);
+
+    this.windowMaterial =
+      new THREE.MeshStandardMaterial({
+        color: 0xbfe6ea,
+        emissive: 0x2c5760,
+        emissiveIntensity: 0.24,
+        roughness: 0.22,
+        metalness: 0.35
+      });
+
+    /*
      * Floors.
      */
     for (
@@ -163,14 +181,14 @@ class BuildingView {
        */
       const facadeThickness =
         Math.max(
-          0.08,
-          w * 0.012
+          0.14,
+          w * 0.018
         );
 
       const facadeHeight =
         Math.max(
-          0.12,
-          fh * 0.65
+          0.3,
+          fh * 0.92
         );
 
       const facadeMaterial =
@@ -251,6 +269,11 @@ class BuildingView {
         right
       );
 
+      this.addFacadeWindows(front, "x", 1, w, facadeHeight, facadeThickness);
+      this.addFacadeWindows(back, "x", -1, w, facadeHeight, facadeThickness);
+      this.addFacadeWindows(left, "z", -1, w, facadeHeight, facadeThickness);
+      this.addFacadeWindows(right, "z", 1, w, facadeHeight, facadeThickness);
+
       facadeGroup.forEach(
         mesh => {
           mesh.castShadow =
@@ -309,11 +332,10 @@ class BuildingView {
         i++
       ) {
         const geometry =
-          new THREE.CylinderGeometry(
-            colR,
-            colR,
+          new THREE.BoxGeometry(
+            colR * 1.7,
             fh,
-            10
+            colR * 1.7
           );
 
         const mesh =
@@ -368,11 +390,10 @@ class BuildingView {
             i++
           ) {
             const geometry =
-              new THREE.CylinderGeometry(
-                colR * 0.8,
-                colR * 0.8,
+              new THREE.BoxGeometry(
+                colR * 1.4,
                 fh,
-                8
+                colR * 1.4
               );
 
             const mesh =
@@ -406,43 +427,84 @@ class BuildingView {
     }
 
     /*
-     * Foundation.
+     * Roofline: a parapet lip plus a small mechanical cap, attached
+     * as a child of the top floor's slab so it rides along with
+     * that floor's sway (and disappears with it on collapse).
      */
-    const foundationHeight =
-      Math.max(
-        0.35,
-        fh * 0.16
+    const topFloor =
+      this.floors[N - 1];
+
+    if (topFloor) {
+      const roofGroup =
+        new THREE.Group();
+
+      const parapetHeight =
+        Math.max(0.22, fh * 0.09);
+
+      const parapet =
+        new THREE.Mesh(
+          new THREE.BoxGeometry(
+            w + 0.1,
+            parapetHeight,
+            w + 0.1
+          ),
+          new THREE.MeshStandardMaterial({
+            color: 0x444d54,
+            roughness: 0.78,
+            metalness: 0.06
+          })
+        );
+
+      parapet.position.y =
+        slabThickness / 2 +
+        parapetHeight / 2;
+
+      parapet.castShadow =
+        true;
+
+      roofGroup.add(
+        parapet
       );
 
-    const foundationGeometry =
-      new THREE.BoxGeometry(
-        w * 1.12,
-        foundationHeight,
-        w * 1.12
+      const capSize =
+        Math.max(1.1, w * 0.26);
+
+      const capHeight =
+        Math.max(0.55, fh * 0.32);
+
+      const cap =
+        new THREE.Mesh(
+          new THREE.BoxGeometry(
+            capSize,
+            capHeight,
+            capSize * 0.68
+          ),
+          new THREE.MeshStandardMaterial({
+            color: 0x5b656c,
+            roughness: 0.7,
+            metalness: 0.1
+          })
+        );
+
+      cap.position.set(
+        0,
+        slabThickness / 2 +
+          parapetHeight +
+          capHeight / 2,
+        0
       );
 
-    this.foundation =
-      new THREE.Mesh(
-        foundationGeometry,
-        new THREE.MeshStandardMaterial({
-          color: 0x3d444a,
-          roughness: 0.88,
-          metalness: 0.02
-        })
+      cap.castShadow =
+        true;
+
+      roofGroup.add(
+        cap
       );
 
-    this.foundation.position.y =
-      -foundationHeight / 2;
-
-    this.foundation.castShadow =
-      true;
-
-    this.foundation.receiveShadow =
-      true;
-
-    this.group.add(
-      this.foundation
-    );
+      topFloor.slab.add(
+        roofGroup
+      );
+    }
 
     this.updatePose();
   }
@@ -652,6 +714,89 @@ class BuildingView {
         dx,
         dy
       );
+  }
+
+  /**
+   * Instances a row of glazing panes across one facade face and adds
+   * them as children of that facade mesh, so they inherit its sway,
+   * skew and collapse motion for free.
+   *
+   * axis: "x" for the front/back faces (windows spaced along local x,
+   * facing along local z); "z" for the left/right faces (windows
+   * spaced along local z, facing along local x).
+   * outwardSign: +1 or -1, which way along the facing axis the glass
+   * sits so it reads flush with the outer wall surface.
+   * span: the facade's own width (equal to the building width, w).
+   */
+  addFacadeWindows(
+    facade,
+    axis,
+    outwardSign,
+    span,
+    facadeHeight,
+    facadeThickness
+  ) {
+    const margin =
+      Math.min(0.6, span * 0.08);
+
+    const usable =
+      Math.max(0.5, span - margin * 2);
+
+    const columns =
+      Math.max(
+        2,
+        Math.min(14, Math.floor(usable / 2.2))
+      );
+
+    const winSpan =
+      Math.min(1.6, (usable / columns) * 0.7);
+
+    const winHeight =
+      Math.min(1.3, facadeHeight * 0.55);
+
+    const outward =
+      facadeThickness / 2 + 0.006;
+
+    const spacing =
+      columns > 1 ? usable / (columns - 1) : 0;
+
+    const mesh =
+      new THREE.InstancedMesh(
+        this.windowGeometry,
+        this.windowMaterial,
+        columns
+      );
+
+    const matrix =
+      new THREE.Matrix4();
+
+    const scale =
+      axis === "x"
+        ? new THREE.Vector3(winSpan, winHeight, 0.12)
+        : new THREE.Vector3(0.12, winHeight, winSpan);
+
+    for (let c = 0; c < columns; c++) {
+      const t =
+        columns > 1 ? -usable / 2 + c * spacing : 0;
+
+      const position =
+        axis === "x"
+          ? new THREE.Vector3(t, 0, outwardSign * outward)
+          : new THREE.Vector3(outwardSign * outward, 0, t);
+
+      matrix.compose(
+        position,
+        new THREE.Quaternion(),
+        scale
+      );
+
+      mesh.setMatrixAt(c, matrix);
+    }
+
+    mesh.instanceMatrix.needsUpdate =
+      true;
+
+    facade.add(mesh);
   }
 
   applyDamageColor(i) {
